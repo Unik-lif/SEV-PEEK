@@ -115,3 +115,13 @@ Therefore, more restrictions are set for a page wrtie. For a guest page to be wr
 
 VMPLs are in some ways like nested virtualization in that a guest may contian its own management layer running at high VMPL which controls permissions on its other pages. Therefore, can be used to construct a hypervisor-like use model in a cloud environment.
 
+### Interrupt Protection
+
+**TPR:** Task Priority Register. Recall OSTEP for MLFQ(multilevel feedback queue scheduling), TPR has 4 bit to give the priority. **That's literally the same as these multi-levels.**
+
+For a guest VM, it is possible that a malicuous hypervisor can violate the design of an Operating System.&#x20;
+
+For example, an operating system may not expect to take a low priority interrupt when their TPR is elevated or it may not expect to take a #UD exception after executing an ADD instruction. But a malicuous hypervisor can make these things come true.
+
+
+
