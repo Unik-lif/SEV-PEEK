@@ -64,7 +64,7 @@ Hypervisor, guest VMs are seperateds cryptographically.
 
 **The difference is shown below:**
 
-<figure><img src="../.gitbook/assets/Screenshot 2023-02-27 192302.png" alt=""><figcaption><p>comparison</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Screenshot 2023-02-27 192302 (1).png" alt=""><figcaption><p>comparison</p></figcaption></figure>
 
 #### Key management
 

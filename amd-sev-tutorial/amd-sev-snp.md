@@ -61,7 +61,13 @@ Note that not every memory access requires RMP check, only the one with SEV-SNP 
 
 #### Page Validation: Every gPA -> One PA
 
-Inside each RMP entry is a Validated bit, which is cleared to 0 by CPU hardware when a new RMP entry is created for a guest. The guest can only use the page after it sets the Validated bit through a new CPU instruction, **PVALIDATE**.
+Why?
+
+**While the nested page tables ensure that each GPA can only map to one SPA, the hypervisor may change these tables at any time.**
+
+Our threat model here take hypervisor as an attacker, so simply using RMP to ensure Intergrity is not enough.
+
+
 
 The figure of Page States change is shown below:
 
@@ -84,4 +90,14 @@ Taken Page remapping attack as an example.
 4. Hypervisor changes mapping in NPT, hoping gPA entry A->mapping to PA entry Y.
 5. The Guest Refuses any Validation after boot time. So RMP\[Y].Validated keeps 0.
 6. The hardware sees RMP\[Y].Validated = 0, causing a #VC exception.
+
+#### Page states transition:
+
+<figure><img src="../.gitbook/assets/Screenshot 2023-03-07 090044.png" alt=""><figcaption><p>Page States</p></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/Screenshot 2023-03-07 092905.png" alt=""><figcaption><p>page transiition</p></figcaption></figure>
+
+The figure above shown the basic page states of SEV-SNP.&#x20;
+
+
 

@@ -40,7 +40,7 @@ If th integrity-check value is not correct, CPU will refuse to resume a guest VM
 
 When using Hypervisor, **VMCB** should be maintained to store info of the VM. It is divided into 2 sections here.
 
-<figure><img src="../.gitbook/assets/Screenshot 2023-03-02 141000 (1).png" alt=""><figcaption><p>VMCB</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Screenshot 2023-03-02 141000.png" alt=""><figcaption><p>VMCB</p></figcaption></figure>
 
 The control Area is unencrypted while the save area is encrypted. Sensitive data is encrypted and has intergrity checks here.
 
