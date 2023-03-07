@@ -115,6 +115,8 @@ Therefore, more restrictions are set for a page write. For a guest page to be wr
 
 VMPLs are in some ways like nested virtualization in that a guest may contain its own management layer running at high VMPL which controls permissions on its other pages. Therefore, can be used to construct a hypervisor-like use model in a cloud environment.
 
+<figure><img src="../.gitbook/assets/Screenshot 2023-03-07 184119.png" alt=""><figcaption><p>VMPL #VC Exception</p></figcaption></figure>
+
 ### Interrupt Protection
 
 **TPR:** Task Priority Register. Recall OSTEP for MLFQ (multilevel feedback queue scheduling), TPR has 4 bits to give the priority. **That's literally the same as these multi-levels.**
@@ -129,4 +131,12 @@ To eliminate these dangers, two optional modes are added.
 2. **Alternate Injection:** standard virtual interrupt queuing and injection interfaces are only controlled by the guest itself. Control info will be stored in VMSA, which can only be accessed by someone with access to the guest data, such as VMPL0.
 
 
+
+Note that every VMPL matches a vCPU, therefore we can now more clearly understand the graph above. Let's recall AMD-ES 's process, remember **VMSA** is well encrypted, therefore Hypervisor won't get more detailed information.
+
+**Every vCPU has a VMSA.**
+
+**RDMSR:** read from model specific registers. These registers are highly bounded with the **Power Management, Performance Monitoring, etc.** So basically MSR is a priviledged register, only root can access these registers.
+
+该模型可以跑一些legacy model，让其跑一遍上述的流程，会更加安全一些。
 
