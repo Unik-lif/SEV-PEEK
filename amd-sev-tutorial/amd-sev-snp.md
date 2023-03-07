@@ -95,33 +95,38 @@ Taken Page remapping attack as an example.
 
 <figure><img src="../.gitbook/assets/Screenshot 2023-03-07 090044.png" alt=""><figcaption><p>Page States</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/Screenshot 2023-03-07 092905.png" alt=""><figcaption><p>page transiition</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Screenshot 2023-03-07 092905.png" alt=""><figcaption><p>page transition</p></figcaption></figure>
 
 The figure above shown the basic page states and transition graphs of SEV-SNP. More details are described in AMD SEV Secure Nested Page ABI.
 
-#### VMPL: virtual machine priviledge levels
+#### VMPL: virtual machine privilege levels
 
-This is a new optional features, which allows a guest VM to divide its address space into 4 levels. When this feature is enabled, **every vCPU of a VM is assigned a VMPL.**&#x20;
+This is a new optional feature, which allows a guest VM to divide its address space into 4 levels. When this feature is enabled, **every vCPU of a VM is assigned a VMPL.**&#x20;
 
 The RMP entry for each page of private guest memory is also augmented with page access rights corresponding to each VMPL and are applied in addition to standard paging permissions.
 
-By default, VMPL0 has all the priviledges to RMP memory entry, and can use **RMPADJUST** to grant other VMPL(1\~3) priviledges.
+By default, VMPL0 has all the privileges to RMP memory entry, and can use **RMPADJUST** to grant other VMPL (1\~3) privileges.
 
 _The RMPADJUST instruction allows a given VMPL to modify permissions for a less privileged VMPL. For example, VMPL0 can grant read and write (but not execute) permissions on a page to VMPL1._
 
 It seems that VMPL1 can't execute the code in a RMP memory entry.
 
-Therefore, more restrictions are set for a page wrtie. For a guest page to be writeable for instance, it must be marked writeable in the **guest-managed page tables** (corresponding to the active vCPU, **inside the Guest VM**), the nested page tables (**managed by the hypervisor**), as well as the RMP table (**managed by a higher privileged VMPL**).
+Therefore, more restrictions are set for a page write. For a guest page to be writeable for instance, it must be marked writeable in the **guest-managed page tables** (corresponding to the active vCPU, **inside the Guest VM**), the nested page tables (**managed by the hypervisor**), as well as the RMP table (**managed by a higher privileged VMPL**).
 
-VMPLs are in some ways like nested virtualization in that a guest may contian its own management layer running at high VMPL which controls permissions on its other pages. Therefore, can be used to construct a hypervisor-like use model in a cloud environment.
+VMPLs are in some ways like nested virtualization in that a guest may contain its own management layer running at high VMPL which controls permissions on its other pages. Therefore, can be used to construct a hypervisor-like use model in a cloud environment.
 
 ### Interrupt Protection
 
-**TPR:** Task Priority Register. Recall OSTEP for MLFQ(multilevel feedback queue scheduling), TPR has 4 bit to give the priority. **That's literally the same as these multi-levels.**
+**TPR:** Task Priority Register. Recall OSTEP for MLFQ (multilevel feedback queue scheduling), TPR has 4 bits to give the priority. **That's literally the same as these multi-levels.**
 
-For a guest VM, it is possible that a malicuous hypervisor can violate the design of an Operating System.&#x20;
+For a guest VM, it is possible that a malicious hypervisor can violate the design of an Operating System.&#x20;
 
-For example, an operating system may not expect to take a low priority interrupt when their TPR is elevated or it may not expect to take a #UD exception after executing an ADD instruction. But a malicuous hypervisor can make these things come true.
+For example, an operating system may not expect to take a low priority interrupt when their TPR is elevated, or it may not expect to take a #UD exception after executing an ADD instruction. But a malicious hypervisor can make these things come true.
+
+To eliminate these dangers, two optional modes are added.
+
+1. **Restricted Injection:** disables virtual interrupt, partially disables interrupt injection interface. In which the HV is only allowed to inject a single newly defined exception vector, #HV, to act as a doorbell. -> **para-virtualized manner.**
+2. **Alternate Injection:** standard virtual interrupt queuing and injection interfaces are only controlled by the guest itself. Control info will be stored in VMSA, which can only be accessed by someone with access to the guest data, such as VMPL0.
 
 
 
