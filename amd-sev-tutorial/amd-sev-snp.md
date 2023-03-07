@@ -97,7 +97,21 @@ Taken Page remapping attack as an example.
 
 <figure><img src="../.gitbook/assets/Screenshot 2023-03-07 092905.png" alt=""><figcaption><p>page transiition</p></figcaption></figure>
 
-The figure above shown the basic page states of SEV-SNP.&#x20;
+The figure above shown the basic page states and transition graphs of SEV-SNP. More details are described in AMD SEV Secure Nested Page ABI.
 
+#### VMPL: virtual machine priviledge levels
 
+This is a new optional features, which allows a guest VM to divide its address space into 4 levels. When this feature is enabled, **every vCPU of a VM is assigned a VMPL.**&#x20;
+
+The RMP entry for each page of private guest memory is also augmented with page access rights corresponding to each VMPL and are applied in addition to standard paging permissions.
+
+By default, VMPL0 has all the priviledges to RMP memory entry, and can use **RMPADJUST** to grant other VMPL(1\~3) priviledges.
+
+_The RMPADJUST instruction allows a given VMPL to modify permissions for a less privileged VMPL. For example, VMPL0 can grant read and write (but not execute) permissions on a page to VMPL1._
+
+It seems that VMPL1 can't execute the code in a RMP memory entry.
+
+Therefore, more restrictions are set for a page wrtie. For a guest page to be writeable for instance, it must be marked writeable in the **guest-managed page tables** (corresponding to the active vCPU, **inside the Guest VM**), the nested page tables (**managed by the hypervisor**), as well as the RMP table (**managed by a higher privileged VMPL**).
+
+VMPLs are in some ways like nested virtualization in that a guest may contian its own management layer running at high VMPL which controls permissions on its other pages. Therefore, can be used to construct a hypervisor-like use model in a cloud environment.
 
