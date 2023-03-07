@@ -16,9 +16,9 @@ Since Guest VM has two types of memory: unecrypted (shared) or encrypted (privat
 
 <figure><img src="../.gitbook/assets/Screenshot 2023-03-04 115139.png" alt=""><figcaption><p>Threat Model</p></figcaption></figure>
 
-**Threat Model is shown above.** Basically the untrusted means these components are assumed to be malicious, potentially conspiring with other untrusted components in an effort to compromise the security guarantees of an SEV-SNP VM.
+**Threat Model is shown above.** Basically, the untrusted means these components are assumed to be malicious, potentially conspiring with other untrusted components in an effort to compromise the security guarantees of an SEV-SNP VM.
 
-The SNP VM doesn't means the full VM is encrypted as a private one, it still contains the unecrypted (shared) memory part as we mentioned above. But the unecrypted memory won't compromise the security of SNP VM. That's the idea.
+The SNP VM isn't encrypted as a private one, it still contains the unencrypted (shared) memory part as we mentioned above. But the unencrypted memory won't compromise the security of SNP VM. That's the idea.
 
 **Confidentiality:** SEV, SEV-ES features.
 
@@ -36,13 +36,13 @@ The SNP VM doesn't means the full VM is encrypted as a private one, it still con
 
 **etc. please refer to the whitepaper.**
 
-#### **Integerity Threats:**&#x20;
+### **Integrity Threats:**&#x20;
 
-The Integerity memory might suffer from basically consists of 4 types: Replay Protection, Data Corruption, Memory Aliasing, and Memory Re-Mapping.
+The Integrity memory might suffer from basically consists of 4 types: Replay Protection, Data Corruption, Memory Aliasing, and Memory Re-Mapping.
 
 The idea behind is form a one-to-one mapping between guest memory to physical memory, which somehow resists the hypervisor from attacking the guest.
 
-#### Reverse Map Table: Every PA -> One gPA
+### Reverse Map Table: Every PA -> One gPA
 
 The RMP is a single data structure shared across the system that contains one entry for every 4k page of DRAM that may be used by VMs.
 
@@ -59,7 +59,7 @@ RMP has two ways of checking:
 
 Note that not every memory access requires RMP check, only the one with SEV-SNP protection enabled will require RMP check. BTW, write accesses include both standard memory writes as well as A/D-bit updates as part of the page table walk. Like with standard x86 paging, the results of the RMP check are cached in the CPU TLB and related structures.
 
-#### Page Validation: Every gPA -> One PA
+### Page Validation: Every gPA -> One PA
 
 Why?
 
@@ -91,7 +91,7 @@ Taken Page remapping attack as an example.
 5. The Guest Refuses any Validation after boot time. So RMP\[Y].Validated keeps 0.
 6. The hardware sees RMP\[Y].Validated = 0, causing a #VC exception.
 
-#### Page states transition:
+### Page states transition:
 
 <figure><img src="../.gitbook/assets/Screenshot 2023-03-07 090044.png" alt=""><figcaption><p>Page States</p></figcaption></figure>
 
@@ -99,7 +99,7 @@ Taken Page remapping attack as an example.
 
 The figure above shown the basic page states and transition graphs of SEV-SNP. More details are described in AMD SEV Secure Nested Page ABI.
 
-#### VMPL: virtual machine privilege levels
+### VMPL: virtual machine privilege levels
 
 This is a new optional feature, which allows a guest VM to divide its address space into 4 levels. When this feature is enabled, **every vCPU of a VM is assigned a VMPL.**&#x20;
 
@@ -117,6 +117,14 @@ VMPLs are in some ways like nested virtualization in that a guest may contain it
 
 <figure><img src="../.gitbook/assets/Screenshot 2023-03-07 184119.png" alt=""><figcaption><p>VMPL #VC Exception</p></figcaption></figure>
 
+Note that every VMPL matches a vCPU, therefore we can now more clearly understand the graph above. Let's recall AMD-ES 's process, remember **VMSA** is well encrypted, therefore Hypervisor won't get more detailed information.
+
+**Every vCPU has a VMSA.**
+
+**RDMSR:** read from model specific registers. These registers are highly bounded with the **Power Management, Performance Monitoring, etc.** So basically, MSR is a privileged register, only root can access these registers.
+
+该模型可以跑一些legacy model，让其跑一遍上述的流程，会更加安全一些。
+
 ### Interrupt Protection
 
 **TPR:** Task Priority Register. Recall OSTEP for MLFQ (multilevel feedback queue scheduling), TPR has 4 bits to give the priority. **That's literally the same as these multi-levels.**
@@ -130,13 +138,28 @@ To eliminate these dangers, two optional modes are added.
 1. **Restricted Injection:** disables virtual interrupt, partially disables interrupt injection interface. In which the HV is only allowed to inject a single newly defined exception vector, #HV, to act as a doorbell. -> **para-virtualized manner.**
 2. **Alternate Injection:** standard virtual interrupt queuing and injection interfaces are only controlled by the guest itself. Control info will be stored in VMSA, which can only be accessed by someone with access to the guest data, such as VMPL0.
 
+The combination of 2 modes above leads to ability of VMPL0 to perform interrupt handling and APIC emulation.
+
+(I am not so sure about para-virtualized manner, let us simply get the main idea here)
+
+<figure><img src="../.gitbook/assets/微信图片_20230307221933.png" alt=""><figcaption><p>VMPL->Handling</p></figcaption></figure>
+
+### Others:&#x20;
+
+1. **Trusted Platform Information: CPUID** filtering.
+2. **TCB Versioning:** Version numbers of all TCB components are combined with a fused secret called the Chip Endorsement Key to create a Versioned Chip Endorsement Key, to enable the version is at least with upgraded features in.
+
+### VM Launch & Attestation
+
+**Launch process:**
+
+1. AMD-SP measures the contents of these pages into a launch digest.
+2. In SEV-SNP, AMD-SP also measures the metadata associated with these pages.
+3. at the end of the launch process, the guest owner can supply a signed identity block(IDB) to associate with the VM.
+
+more flexible Attestation:
+
+a set of private communication keys are created by AMD-SP at launch time, which the guest can use to communicate directly with the AMD-SP.
 
 
-Note that every VMPL matches a vCPU, therefore we can now more clearly understand the graph above. Let's recall AMD-ES 's process, remember **VMSA** is well encrypted, therefore Hypervisor won't get more detailed information.
-
-**Every vCPU has a VMSA.**
-
-**RDMSR:** read from model specific registers. These registers are highly bounded with the **Power Management, Performance Monitoring, etc.** So basically MSR is a priviledged register, only root can access these registers.
-
-该模型可以跑一些legacy model，让其跑一遍上述的流程，会更加安全一些。
 
