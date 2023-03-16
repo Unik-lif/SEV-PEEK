@@ -4,7 +4,7 @@ description: Original talk about the white paper of SME & SEV.
 
 # x86 Memory Encryption
 
-## From the talk in USENIX Security '16 & Xen projects.
+## From the talk in USENIX Security '16 & Xen projects & Linux Security Summit 2016.
 
 SEV is an extension to the AMD-V architecture which supports running encrypted virtual machine under the control of KVM.
 
@@ -65,6 +65,22 @@ Hypervisor, guest VMs are seperateds cryptographically.
 **The difference is shown below:**
 
 <figure><img src="../.gitbook/assets/Screenshot 2023-02-27 192302 (1).png" alt=""><figcaption><p>comparison</p></figcaption></figure>
+
+**SEV Arch:**
+
+<figure><img src="../.gitbook/assets/微信图片_20230316112043.png" alt=""><figcaption><p>SEV arch</p></figcaption></figure>
+
+The graph above shows the basic arch of SEV. Basically A memory Controller and a 32-bit AMD-SP are located in the SOC. The AMD-SP is the only one that has the access to the red part of the Memory Controller. The red part stores keys of Guest Owners which is the base of cryptographically isolation infrastructure of SEV.
+
+An abstraction is provided for The Hypervisor to use some APIs to provide services for Guest VMs, and these services are enabled by the SEV Driver in it.
+
+Since the Hypervisor is deemed as attackers, it serves as untrusted communication channel for guest owner and AMD SP communications. To avoid man-in-the-middle attack, more checks are embeded during these processes.
+
+#### @Boot Time
+
+The boot time process is well described in this pdf. Please focus on page 11 to 16. Bear it in mind!!
+
+{% embed url="http://events17.linuxfoundation.org/sites/events/files/slides/AMD%20x86%20Memory%20Encryption%20Technology%20LSS%20Slides.pdf" %}
 
 #### Key management
 
