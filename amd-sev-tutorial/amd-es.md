@@ -48,8 +48,12 @@ The control Area is unencrypted while the save area is encrypted. Sensitive data
 
 Different from legacy AMD-V VMEXIT, when AMD-ES is enabled, VMEXIT will be divided into two groups:&#x20;
 
-1. **AE:** automatic exits. AE events **do not require any hypervisor emulation** and include asynchronous interrupts, shutdown events, and cerain types of page faults. **When AE occurs, this will cause a full world switch and transfer control back to the hypervisor. As we mentioned above, with AMD-ES, the exit process is also atomic.**
-2. **NAE:** Non-automatic exits. This occur when the guest VM does something that will require hypervisor emulation. **When AMD-ES is enabled, this won't cause the world switch back to HV.** However, it will send a new exception **#VC**(VMM communication exception), which must be handled by the guest VM.
+* **AE:** automatic exits. AE events **do not require any hypervisor emulation** and include asynchronous interrupts, shutdown events, and cerain types of page faults. **When AE occurs, this will cause a full world switch and transfer control back to the hypervisor. As we mentioned above, with AMD-ES, the exit process is also atomic.**
+  * The events involved here do not require guest register state.
+* **NAE:** Non-automatic exits. This occur when the guest VM does something that will require hypervisor emulation. **When AMD-ES is enabled, this won't cause the world switch back to HV.** However, it will send a new exception **#VC**(VMM communication exception), which must be handled by the guest VM.
+  * The events involved here do require guest register state.
+  * Guest determines what register state to share in the GHCB.
+  * Guest issues VMGEXIT instruction which causes an AE with exit code 0x403.
 
 ### [#vc](amd-es.md#vc "mention"): this is an exception send by CPU
 
@@ -69,4 +73,10 @@ Take the Above flow for example: you can refer to OSTEP chapter hypervisor as we
 4. **Registers State should be stored, as mentioned before, it will automatically and atomically be encrypted, then be sent to Hypervisor.**
 5. **Hypervisor receive VMGEXIT, fetch what guest need, store it in GHCB. Then VMRUN to resume.**
 6. **Load and decrypt guest state. etc..**
+
+**A more detailed graph is shown below:**
+
+<figure><img src="../.gitbook/assets/Screenshot 2023-03-18 164707.png" alt=""><figcaption><p>Clear Explaination</p></figcaption></figure>
+
+****
 
