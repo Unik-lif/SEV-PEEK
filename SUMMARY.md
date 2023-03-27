@@ -7,3 +7,4 @@
   * [AMD SEV-SNP](amd-sev-tutorial/amd-sev-snp.md)
   * [Enarx](amd-sev-tutorial/enarx.md)
   * [Secure Encrypted Virtualization - What's next?](amd-sev-tutorial/secure-encrypted-virtualization-whats-next.md)
+  * [SEV-SNP Report.](amd-sev-tutorial/sev-snp-report..md)

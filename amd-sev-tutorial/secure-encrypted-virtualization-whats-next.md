@@ -15,3 +15,5 @@ Have to use SP to perform these tasks. But it is not so quick -> becomes a bottl
 * MH migrates the remainder of the guest
   * Uses CPU AES instruction, AMD SP not involved
   * Migration at multiple Gbps. (**relatively quick.**)
+
+**-> Prepare for SNP release.**
